@@ -1,0 +1,8 @@
+{
+    "name": "CouchResource",
+    "dependencies": ["narwhal", "objective-j", "cappuccino", "python"],
+    "author": "Yves Serrano",
+    "description": "couchdb for cappuccino",
+    "keywords": ["objective-j", "cappuccino", "couchdb"],
+    "objj-frameworks": ["Framework"]
+}
