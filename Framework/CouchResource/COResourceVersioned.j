@@ -6,21 +6,21 @@ var couchVersions = [[CPDictionary alloc] init];
 @implementation COResourceVersioned : COResource
 {
     CPString identifier @accessors;
-    CPString prevCoRev @accessors;
+    CPString prevRev @accessors;
 }
 
 - (BOOL)save
 {
-    [self setPrevCoRev:[self coRev]];
+    [self setPrevRev:[self coRev]];
     var documentSaved = [super save];
-    if (documentSaved && [self prevCoRev] != null)
+    if (documentSaved && [self prevRev] != null)
     {
         var path = [[self class] resourcePath] +
                    "/" + identifier +
-                   "/" + [self prevCoRev] + "?rev=" + [self coRev];
+                   "/" + [self prevRev] + "?rev=" + [self coRev];
         var request = [CPURLRequest requestJSONWithURL:path];
         [request setHTTPMethod:@"PUT"];
-        [request setHTTPBody:[couchVersions objectForKey:[self prevCoRev]]];
+        [request setHTTPBody:[couchVersions objectForKey:[self prevRev]]];
 
         var response = [CPURLConnection sendSynchronousRequest:request];
         if (response[0] >= 400)
