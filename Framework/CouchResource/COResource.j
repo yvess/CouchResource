@@ -138,21 +138,29 @@ var defaultIdentifierKey = @"_id",
                         //}
                         break;
                     case "object":
-                        if ([value className] == @"_CPJavaScriptArray") {
-                            var valueArray = [[CPArray alloc] initWithArray:value];
-                            var label = [self transformLabel:attributeName];
-                            var objectContainer = [[COItemsParent alloc] initWithLabel:label];
-                            var objectArray = [objectContainer items];
-                            [valueArray enumerateObjectsUsingBlock:function(item) {
-                                var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]];
-                                var subObjectClass = CPClassFromString(subObjectClassName);
-                                [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
-                            }];
-
-
-                            [self setValue:objectContainer forKey:attributeName];
+                        try {
+                            if ([value className] == @"_CPJavaScriptArray") {
+                                var valueArray = [[CPArray alloc] initWithArray:value];
+                                var label = [self transformLabel:attributeName];
+                                var objectContainer = [[COItemsParent alloc] initWithLabel:label];
+                                var objectArray = [objectContainer items];
+                                [valueArray enumerateObjectsUsingBlock:function(item) {
+                                    var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]];
+                                    var subObjectClass = CPClassFromString(subObjectClassName);
+                                    [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
+                                }];
+                                [self setValue:objectContainer forKey:attributeName];
+                            }
+                        }
+                        catch (err)
+                        {
+                            if (attributeName == @"coAttachments") {
+                                [self setValue:value forKey:attributeName];
+                            }
                         }
                         break;
+                    default:
+                        console.log("### no match found", attributeName);
                 }
             }
         }
@@ -352,9 +360,7 @@ var defaultIdentifierKey = @"_id",
 
         for (var i = 0; i < collection.length; i++) {
             var resource   = collection[i];
-            //var attributes = resource[[self underscoreName]];
             var attributes = resource;
-            //if ([self className] == "Dns") CPLog.debug(attributes);
             [resourceArray addObject:[self new:attributes]];
         }
     }
@@ -463,6 +469,11 @@ var defaultIdentifierKey = @"_id",
     return @"name";
 }
 
+// hook overwrite
+- (void) isSelected
+{
+}
+
 - (id)initFromCouch
 {
     self = [super init];
@@ -476,7 +487,7 @@ var defaultIdentifierKey = @"_id",
     {
         //[self setType:[[self class] underscoreName]];
         var selector = [CPString stringWithFormat:@"set%@:", [[self nameIdentifierString] capitalizedString]],
-            newName = [CPString stringWithFormat:@"new %@", [[self class] underscoreName]];
+            newName  = [CPString stringWithFormat:@"new %@", [[self class] underscoreName]];
         [self performSelector:CPSelectorFromString(selector) withObject:newName];
 
     }

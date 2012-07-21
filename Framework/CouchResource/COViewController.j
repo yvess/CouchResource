@@ -31,7 +31,8 @@
 
 - (id)lastSelectedObject
 {
-    return [[arrayController selectedObjects] lastObject];
+    var selectedObject = [[arrayController selectedObjects] lastObject];
+    return selectedObject;
 }
 
 - (void)saveModel:(id)sender
