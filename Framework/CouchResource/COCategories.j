@@ -133,7 +133,7 @@
 
 // Works just like built-in method, but returns CPArray instead of CPData.
 // First value in array is HTTP status code, second is data string.
-+ (CPArray)sendSynchronousRequest:(CPURLRequest)aRequest
++ (CPArray)sendSynchronousRequestCouch:(CPURLRequest)aRequest
 {
     try {
         var request = new CFHTTPRequest();
@@ -148,8 +148,7 @@
             request.setRequestHeader(key, [fields objectForKey:key]);
 
         request.send([aRequest HTTPBody]);
-
-        return [CPArray arrayWithObjects:request.status(), request.responseText()];
+        return [CPArray arrayWithObjects:request.status(), request.responseText(), request.getResponseHeader("X-Couch-Update-NewRev")];
      }
      catch (anException) {}
 
