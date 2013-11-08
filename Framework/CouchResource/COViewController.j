@@ -1,17 +1,19 @@
 @import <AppKit/CPArrayController.j>
 @import <AppKit/CPViewController.j>
-@import <CouchResource/COArrayController.j>
-@import <CouchResource/COCategories.j>
+@import <GrowlCappuccino/GrowlCappuccino.j>
+@import "COArrayController.j"
+@import "COCategories.j"
 
 
 @implementation COViewController : CPViewController
 {
-    IBOutlet              COArrayController arrayController;
-    IBOutlet              CPTableView itemsTable;
-    IBOutlet              CPButton saveModelButton;
+    @outlet              COArrayController arrayController;
+    @outlet              CPTableView itemsTable;
+    @outlet              CPButton saveModelButton;
 
     CPObject              modelClass @accessors();
     CPMutableArray        items @accessors();
+    TNGrowlCenter         growlCenter @accessors();
     /*CPMutableDictionary   clientsLookup;*/
 }
 
@@ -23,8 +25,7 @@
     if (self)
     {
         modelClass = aModelClass;
-        var items = [modelClass all];
-        [items class];
+        items = [modelClass all];
     }
     return self;
 }
@@ -42,7 +43,18 @@
     {
         [item setCoId:[[item class] couchId:item]];
     }
-    [item save];
+    var wasSuccessfull = [item save];
+    if ([self growlCenter])
+    {
+        if (wasSuccessfull)
+        {
+            var message = [CPString stringWithFormat:@"doc: %@ \nwas saved", item.coId];
+            [growlCenter pushNotificationWithTitle:@"saved" message:message];
+        } else {
+            var message = [CPString stringWithFormat:@"doc: %@ \nerror", item.coId];
+            [growlCenter pushNotificationWithTitle:@"error" message:message];
+        }
+    }
     /*if (![clientsLookup valueForKey:[client coId]])
     {
         //[clientsForProjectsPopUp addItemWithTitle:[client name]];
