@@ -1,6 +1,7 @@
 @import <Foundation/CPObject.j>
 @import <Foundation/CPMutableArray.j>
 @import "COCategories.j"
+@import "COItemsParent.j"
 
 
 var defaultIdentifierKey = @"_id",
@@ -201,15 +202,32 @@ var defaultIdentifierKey = @"_id",
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
     if (response[0] >= 400) {
         [self resourceDidNotSave:response[1]];
         return NO;
     } else {
         [self resourceDidSave:response[1]];
-        [self setCoRev:[response[1] objectFromJSON].rev]
+        [self setCoRev:[response[1] objectFromJSON].rev];
+
+        var path = "/add-editor/" + identifier;
+        var request = [CPURLRequest requestJSONWithURL:path];
+        [request setHTTPMethod:@"PUT"];
+        var response = [CPURLConnection sendSynchronousRequestCouch:request];
+        if (response[2]) {
+            [self setCoRev:response[2]];
+        }
         return YES;
+    }
+}
+
+- (void)connection:(CPURLConnection)connection didReceiveResponse:(CPHTTPURLResponse)response
+{
+    var headers = [response allHeaderFields];
+    if ([headers containsKey: @"X-Couch-Update-NewRev" ]) {
+        var newRev = [headers valueForKey:@"X-Couch-Update-NewRev"];
+        [self setCoRev:newRev];
     }
 }
 
@@ -221,7 +239,7 @@ var defaultIdentifierKey = @"_id",
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
     if (response[0] == 200) {
         [self resourceDidDestroy];
@@ -239,7 +257,7 @@ var defaultIdentifierKey = @"_id",
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
     if (response[0] >= 400) {
         return nil;
@@ -252,7 +270,7 @@ var defaultIdentifierKey = @"_id",
 {
     var request = [self collectionWillLoad:params];
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
     if (response[0] >= 400) {
         return nil;
@@ -269,7 +287,7 @@ var defaultIdentifierKey = @"_id",
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];ResourceWillSave
 
     if (response[0] >= 400) {
         return nil;
