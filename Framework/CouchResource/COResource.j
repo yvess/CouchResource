@@ -1,5 +1,6 @@
 @import <Foundation/CPObject.j>
 @import <Foundation/CPMutableArray.j>
+//@import "GrowlCappuccino.j"
 @import "COCategories.j"
 @import "COItemsParent.j"
 
@@ -48,6 +49,20 @@ var defaultIdentifierKey = @"_id",
     return [CPString stringWithFormat:@"%@-%@", cType, [[aItem nameIdentifier] underscoreString]];
 }
 
++ (CPString)nextUUID
+{
+    var path = "/_uuids";
+    var request = [CPURLRequest requestJSONWithURL:path];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+    if (response[0] >= 400)
+    {
+        return NO;
+    } else {
+        var jsonObject = [response[1] objectFromJSON];
+        return jsonObject.uuids[0];
+    }
+}
+
 - (CPString)nameIdentifier
 {
     return [self performSelector:CPSelectorFromString([self nameIdentifierString])];
@@ -63,6 +78,9 @@ var defaultIdentifierKey = @"_id",
                 attr = "_id";
             } else if (ivar.name == 'coRev') {
                 attr = "_rev"
+            } else {
+                var attrString = [CPString stringWithFormat:@"%@", attr];
+                attr = [attrString underscoreString];
             }
             json[attr] = [self performSelector:CPSelectorFromString(ivar.name)];
     }];
@@ -148,7 +166,11 @@ var defaultIdentifierKey = @"_id",
                                 [valueArray enumerateObjectsUsingBlock:function(item) {
                                     var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]];
                                     var subObjectClass = CPClassFromString(subObjectClassName);
-                                    [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
+                                    if ([subObjectClass className] == null) {
+                                        [objectArray addObject:item];
+                                    } else {
+                                        [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
+                                    }
                                 }];
                                 [self setValue:objectContainer forKey:attributeName];
                             }
