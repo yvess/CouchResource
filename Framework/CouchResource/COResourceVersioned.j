@@ -1,13 +1,35 @@
 @import "COResource.j"
 @import <Foundation/CPDictionary.j>
 
-var couchVersions = [[CPDictionary alloc] init];
-
 @implementation COResourceVersioned : COResource
 {
     CPString identifier @accessors;
     CPString prevRev @accessors;
+    CPDictionary couchVersions @accessors;
 }
+
+- (id)init
+{
+    self = [super init];
+    if (self)
+    {
+        couchVersions = [[CPDictionary alloc] init];
+    }
+    return self;
+}
+
+// - (id)initFromCouch
+// {
+//     console.log("initFromCouch");
+//     self = [self init];
+//     if (self)
+//     {
+//         couchVersions = [[CPDictionary alloc] init];
+//         [self addCouchVersion];
+//         console.log(couchVersions);
+//     }
+//     return self;
+// }
 
 - (BOOL)save
 {
@@ -20,15 +42,16 @@ var couchVersions = [[CPDictionary alloc] init];
                    "/" + [self prevRev] + "?rev=" + [self coRev];
         var request = [CPURLRequest requestJSONWithURL:path];
         [request setHTTPMethod:@"PUT"];
-        [request setHTTPBody:[couchVersions objectForKey:[self prevRev]]];
+        var body = [couchVersions objectForKey:[self prevRev]];
+        [request setHTTPBody:body];
 
-        var response = [CPURLConnection sendSynchronousRequest:request];
+        var response = [CPURLConnection sendSynchronousRequestCouch:request];
         if (response[0] >= 400)
         {
             return NO;
         } else {
             [self setCoRev:[response[1] objectFromJSON].rev];
-            [self setCoAttachments: [self loadAttributes]];
+            [self setCoAttachments: [self loadAttachments]];
             [self addCouchVersion];
             return YES;
         }
@@ -39,17 +62,16 @@ var couchVersions = [[CPDictionary alloc] init];
 
 - (void)addCouchVersion
 {
-    console.log("coRev", [self coRev]);
     if ([self coRev] != null)
     {
         [couchVersions setObject:[CPString JSONFromObject:[self attributes]] forKey:[self coRev]];
     }
 }
 
-- (id)loadAttributes
+- (id)loadAttachments
 {
     var path = [[self class] resourcePath] + "/" + identifier,
-        response = [CPURLConnection sendSynchronousRequest:[CPURLRequest requestJSONWithURL:path]],
+        response = [CPURLConnection sendSynchronousRequestCouch:[CPURLRequest requestJSONWithURL:path]],
         attachments = [response[1] objectFromJSON]._attachments;
     return attachments;
 }
