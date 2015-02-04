@@ -30,10 +30,25 @@
     return self;
 }
 
+- (void)reloadItems
+{
+    [self setItems:[modelClass all]];
+}
+
+- (void)setSelectionIndex:(int)index
+{
+    [arrayController setSelectionIndex:index];
+}
+
 - (id)lastSelectedObject
 {
     var selectedObject = [[arrayController selectedObjects] lastObject];
     return selectedObject;
+}
+
+- (int)selectionIndex
+{
+    return [arrayController selectionIndex];
 }
 
 - (void)saveModel:(id)sender
