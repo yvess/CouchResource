@@ -3,7 +3,6 @@
 
 @implementation COResourceVersioned : COResource
 {
-    CPString identifier @accessors;
     CPString prevRev @accessors;
     CPDictionary couchVersions @accessors;
 }

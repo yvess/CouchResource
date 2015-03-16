@@ -1,4 +1,5 @@
 @import <AppKit/CPArrayController.j>
+@import <Foundation/CPNotificationCenter.j>
 
 @implementation COArrayController : CPArrayController
 

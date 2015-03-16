@@ -1,5 +1,6 @@
 @import <Foundation/CPObject.j>
 @import <Foundation/CPMutableArray.j>
+@import <Foundation/CPNotificationCenter.j>
 //@import "GrowlCappuccino.j"
 @import "COCategories.j"
 @import "COItemsParent.j"
@@ -51,9 +52,9 @@ var defaultIdentifierKey = @"_id",
 
 + (CPString)nextUUID
 {
-    var path = "/_uuids";
-    var request = [CPURLRequest requestJSONWithURL:path];
-    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+    var path = "/_uuids",
+        request = [CPURLRequest requestJSONWithURL:path],
+        response = [CPURLConnection sendSynchronousRequestCouch:request];
     if (response[0] >= 400)
     {
         return NO;
@@ -74,7 +75,8 @@ var defaultIdentifierKey = @"_id",
         classIvars = class_copyIvarList([self class]);
     [classIvars enumerateObjectsUsingBlock:function(ivar) {
             var attr = ivar.name;
-            if (ivar.name == 'coId') {
+            if (ivar.name == 'coId')
+            {
                 attr = "_id";
             } else if (ivar.name == 'coRev') {
                 attr = "_rev"
@@ -109,14 +111,13 @@ var defaultIdentifierKey = @"_id",
 }
 
 /* overwrite this for labelTransformation*/
-- (CPString) transformLabel:(CPString) aLabel
+- (CPString)transformLabel:(CPString) aLabel
 {
     return aLabel;
 }
 
 - (void)setAttributes:(JSObject)attributes
 {
-
     for (var attribute in attributes)
     {
         if (attribute == [[self class] identifierKey])
@@ -145,28 +146,21 @@ var defaultIdentifierKey = @"_id",
                         [self setValue:value forKey:attributeName];
                         break;
                     case "string":
-                        /*if (value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                            // its a date
-                            [self setValue:[CPDate dateWithDateString:value] forKey:attributeName];
-                        } else if (value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\+\d{2}:\d{2}|Z)$/)) {
-                            // its a datetime
-                            [self setValue:[CPDate dateWithDateTimeString:value] forKey:attributeName];
-                        } else {
-                            // its a string*/
-                            [self setValue:value forKey:attributeName];
-                        //}
+                        [self setValue:value forKey:attributeName];
                         break;
                     case "object":
                         try {
-                            if ([value className] == @"_CPJavaScriptArray") {
-                                var valueArray = [[CPArray alloc] initWithArray:value];
-                                var label = [self transformLabel:attributeName];
-                                var objectContainer = [[COItemsParent alloc] initWithLabel:label];
-                                var objectArray = [objectContainer items];
+                            if ([value className] == @"_CPJavaScriptArray")
+                            {
+                                var valueArray = [[CPArray alloc] initWithArray:value],
+                                    label = [self transformLabel:attributeName],
+                                    objectContainer = [[COItemsParent alloc] initWithLabel:label],
+                                    objectArray = [objectContainer items];
                                 [valueArray enumerateObjectsUsingBlock:function(item) {
-                                    var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]];
-                                    var subObjectClass = CPClassFromString(subObjectClassName);
-                                    if ([subObjectClass className] == null) {
+                                    var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]],
+                                        subObjectClass = CPClassFromString(subObjectClassName);
+                                    if ([subObjectClass className] == null)
+                                    {
                                         [objectArray addObject:item];
                                     } else {
                                         [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
@@ -177,7 +171,8 @@ var defaultIdentifierKey = @"_id",
                         }
                         catch (err)
                         {
-                            if (attributeName == @"coAttachments") {
+                            if (attributeName == @"coAttachments")
+                            {
                                 [self setValue:value forKey:attributeName];
                             }
                         }
@@ -209,7 +204,8 @@ var defaultIdentifierKey = @"_id",
 + (id)create:(JSObject)attributes
 {
     var resource = [self new:attributes];
-    if ([resource save]) {
+    if ([resource save])
+    {
         return resource;
     } else {
         return nil;
@@ -220,24 +216,27 @@ var defaultIdentifierKey = @"_id",
 {
     var request = [self resourceWillSave];
 
-    if (!request) {
+    if (!request)
+    {
         return NO;
     }
 
     var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
-    if (response[0] >= 400) {
+    if (response[0] >= 400)
+    {
         [self resourceDidNotSave:response[1]];
         return NO;
     } else {
         [self resourceDidSave:response[1]];
         [self setCoRev:[response[1] objectFromJSON].rev];
 
-        var path = "/add-editor/" + identifier;
-        var request = [CPURLRequest requestJSONWithURL:path];
+        var path = "/add-editor/" + identifier,
+            request = [CPURLRequest requestJSONWithURL:path];
         [request setHTTPMethod:@"PUT"];
         var response = [CPURLConnection sendSynchronousRequestCouch:request];
-        if (response[2]) {
+        if (response[2])
+        {
             [self setCoRev:response[2]];
         }
         return YES;
@@ -247,7 +246,8 @@ var defaultIdentifierKey = @"_id",
 - (void)connection:(CPURLConnection)connection didReceiveResponse:(CPHTTPURLResponse)response
 {
     var headers = [response allHeaderFields];
-    if ([headers containsKey: @"X-Couch-Update-NewRev" ]) {
+    if ([headers containsKey: @"X-Couch-Update-NewRev" ])
+    {
         var newRev = [headers valueForKey:@"X-Couch-Update-NewRev"];
         [self setCoRev:newRev];
     }
@@ -257,13 +257,15 @@ var defaultIdentifierKey = @"_id",
 {
     var request = [self resourceWillDestroy];
 
-    if (!request) {
+    if (!request)
+    {
         return NO;
     }
 
     var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
-    if (response[0] == 200) {
+    if (response[0] == 200)
+    {
         [self resourceDidDestroy];
         return YES;
     } else {
@@ -275,13 +277,15 @@ var defaultIdentifierKey = @"_id",
 {
     var request = [self collectionWillLoad];
 
-    if (!request) {
+    if (!request)
+    {
         return NO;
     }
 
     var response = [CPURLConnection sendSynchronousRequestCouch:request];
 
-    if (response[0] >= 400) {
+    if (response[0] >= 400)
+    {
         return nil;
     } else {
         return [self collectionDidLoad:response[1]];
@@ -290,11 +294,11 @@ var defaultIdentifierKey = @"_id",
 
 + (CPArray)allWithParams:(JSObject)params
 {
-    var request = [self collectionWillLoad:params];
+    var request = [self collectionWillLoad:params],
+        response = [CPURLConnection sendSynchronousRequestCouch:request];
 
-    var response = [CPURLConnection sendSynchronousRequestCouch:request];
-
-    if (response[0] >= 400) {
+    if (response[0] >= 400)
+    {
         return nil;
     } else {
         return [self collectionDidLoad:response[1]];
@@ -305,13 +309,16 @@ var defaultIdentifierKey = @"_id",
 {
     var request = [self resourceWillLoad:identifier];
 
-    if (!request) {
+    if (!request)
+    {
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequestCouch:request];ResourceWillSave
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+    //ResourceWillSave TODO ?
 
-    if (response[0] >= 400) {
+    if (response[0] >= 400)
+    {
         return nil;
     } else {
         return [self resourceDidLoad:response[1]];
@@ -322,7 +329,8 @@ var defaultIdentifierKey = @"_id",
 {
     var collection = [self allWithParams:params];
 
-    if ([collection count] > 0) {
+    if ([collection count] > 0)
+    {
         return [collection objectAtIndex:0];
     } else {
         return nil;
@@ -336,7 +344,8 @@ var defaultIdentifierKey = @"_id",
     var path             = [self resourcePath] + "/" + identifier,
         notificationName = [self className] + "ResourceWillLoad";
 
-    if (!path) {
+    if (!path)
+    {
         return nil;
     }
 
@@ -370,15 +379,18 @@ var defaultIdentifierKey = @"_id",
     var path             = [self resourcePath],
         notificationName = [self className] + "CollectionWillLoad";
 
-    if (params) {
-        if (params.isa && [params isKindOfClass:CPDictionary]) {
+    if (params)
+    {
+        if (params.isa && [params isKindOfClass:CPDictionary])
+        {
             path += ("?" + [CPString paramaterStringFromCPDictionary:params]);
         } else {
             path += ("?" + [CPString paramaterStringFromJSON:params]);
         }
     }
 
-    if (!path) {
+    if (!path)
+    {
         return nil;
     }
 
@@ -395,12 +407,14 @@ var defaultIdentifierKey = @"_id",
     var resourceArray    = [CPArray array],
         notificationName = [self className] + "CollectionDidLoad";
 
-    if ([[aResponse stringByTrimmingWhitespace] length] > 0) {
+    if ([[aResponse stringByTrimmingWhitespace] length] > 0)
+    {
         var collection = [aResponse toJSON];
 
-        for (var i = 0; i < collection.length; i++) {
-            var resource   = collection[i];
-            var attributes = resource;
+        for (var i = 0; i < collection.length; i++)
+        {
+            var resource   = collection[i],
+                attributes = resource;
             [resourceArray addObject:[self new:attributes]];
         }
     }
@@ -411,10 +425,11 @@ var defaultIdentifierKey = @"_id",
 
 - (CPURLRequest)resourceWillSave
 {
-    var abstractNotificationName = [self className] + "ResourceWillSave";
-    var attributes = [self attributes];
+    var abstractNotificationName = [self className] + "ResourceWillSave",
+        attributes = [self attributes];
 
-    if (identifier) {
+    if (identifier)
+    {
         var path             = [[self class] resourcePath] + "/" + identifier,
             notificationName = [self className] + "ResourceWillUpdate";
     } else {
@@ -424,11 +439,13 @@ var defaultIdentifierKey = @"_id",
         var path             = [[self class] resourcePath],
             notificationName = [self className] + "ResourceWillCreate";
     }
-    if (!path) {
+    if (!path)
+    {
         return nil;
     }
 
-    if (attributes._rev == null) {
+    if (attributes._rev == null)
+    {
         delete attributes._rev; // remove _rev from JSON, couchdb doesn't accept "_rev":null
     }
 
@@ -439,7 +456,10 @@ var defaultIdentifierKey = @"_id",
 
     //[request setHTTPBody:JSON.stringify(attributes)];
 
-    if (!attributes._rev) [self setIdentifier:[[self class] couchId:self]];
+    if (!attributes._rev)
+    {
+        [self setIdentifier:[[self class] couchId:self]];
+    }
 
     [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
     [[CPNotificationCenter defaultCenter] postNotificationName:abstractNotificationName object:self];
@@ -455,7 +475,8 @@ var defaultIdentifierKey = @"_id",
     }
     var abstractNotificationName = [self className] + "ResourceDidSave";
 
-    if (identifier) {
+    if (identifier)
+    {
         var notificationName = [self className] + "ResourceDidUpdate";
     } else {
         var notificationName = [self className] + "ResourceDidCreate";
@@ -471,7 +492,8 @@ var defaultIdentifierKey = @"_id",
     var abstractNotificationName = [self className] + "ResourceDidNotSave";
 
     // TODO - do something with errors
-    if (identifier) {
+    if (identifier)
+    {
         var notificationName = [self className] + "ResourceDidNotUpdate";
     } else {
         var notificationName = [self className] + "ResourceDidNotCreate";
@@ -486,7 +508,8 @@ var defaultIdentifierKey = @"_id",
     var path             = [[self class] resourcePath] + "/" + identifier + "?rev=" + [self coRev],
         notificationName = [self className] + "ResourceWillDestroy";
 
-    if (!path) {
+    if (!path)
+    {
         return nil;
     }
 
@@ -497,7 +520,7 @@ var defaultIdentifierKey = @"_id",
     return request;
 }
 
--(void)resourceDidDestroy
+- (void)resourceDidDestroy
 {
     var notificationName = [self className] + "ResourceDidDestroy";
     [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
@@ -510,7 +533,7 @@ var defaultIdentifierKey = @"_id",
 }
 
 // hook overwrite
-- (void) isSelected
+- (void)isSelected
 {
 }
 
@@ -535,4 +558,3 @@ var defaultIdentifierKey = @"_id",
 }
 
 @end
-
