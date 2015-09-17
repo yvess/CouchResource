@@ -167,6 +167,8 @@ var defaultIdentifierKey = @"_id",
                                     }
                                 }];
                                 [self setValue:objectContainer forKey:attributeName];
+                            } else {
+                                //console.log([value className]);
                             }
                         }
                         catch (err)
@@ -174,6 +176,10 @@ var defaultIdentifierKey = @"_id",
                             if (attributeName == @"coAttachments")
                             {
                                 [self setValue:value forKey:attributeName];
+                            } else {
+                                //console.log(attribute);
+                                var dictionary = [CPDictionary dictionaryWithJSObject:value recursively:YES];
+                                [self setValue:objectContainer forKey:attributeName];
                             }
                         }
                         break;
