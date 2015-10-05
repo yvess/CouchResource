@@ -436,9 +436,12 @@ var defaultIdentifierKey = @"_id",
     if (identifier)
     {
         var path             = [[self class] resourcePath] + "/" + identifier,
-            notificationName = [self className] + "ResourceWillUpdate";
+            notificationName = [self className] + "ResourceWillUpdate",
+            cId              = identifier;
     } else {
-        [self setCoId:[[self class] couchId]];
+        var cId = [[self class] couchId];
+        [self setCoId:cId];
+        attributes._id = cId;
         //[self setType:[[self class] underscoreName]];
         delete attributes._rev; // remove _rev from JSON, couchdb doesn't accept "_rev":null
         var path             = [[self class] resourcePath],
@@ -463,7 +466,7 @@ var defaultIdentifierKey = @"_id",
 
     if (!attributes._rev)
     {
-        [self setIdentifier:[[self class] couchId]];
+        [self setIdentifier:cId];
     }
 
     [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
