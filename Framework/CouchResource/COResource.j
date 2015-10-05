@@ -70,21 +70,21 @@ var defaultIdentifierKey = @"_id",
     var json = {},
         classIvars = class_copyIvarList([self class]);
     [classIvars enumerateObjectsUsingBlock:function(ivar) {
-            var attr = ivar.name;
-            if (ivar.name == 'coId')
-            {
-                attr = "_id";
-            } else if (ivar.name == 'coRev') {
-                attr = "_rev"
-            } else {
-                var attrString = [CPString stringWithFormat:@"%@", attr];
-                attr = [attrString underscoreString];
-            }
-            var value = [self performSelector:CPSelectorFromString(ivar.name)];
-            if (value != null)
-            {
-                json[attr] = value;
-            }
+        var attr = ivar.name;
+        if (ivar.name == 'coId')
+        {
+            attr = "_id";
+        } else if (ivar.name == 'coRev') {
+            attr = "_rev"
+        } else {
+            var attrString = [CPString stringWithFormat:@"%@", attr];
+            attr = [attrString underscoreString];
+        }
+        var value = [self performSelector:CPSelectorFromString(ivar.name)];
+        if (value != null)
+        {
+            json[attr] = value;
+        }
     }];
     json['type'] = [[self class] underscoreName];
     return json;
