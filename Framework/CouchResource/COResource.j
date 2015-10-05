@@ -80,7 +80,11 @@ var defaultIdentifierKey = @"_id",
                 var attrString = [CPString stringWithFormat:@"%@", attr];
                 attr = [attrString underscoreString];
             }
-            json[attr] = [self performSelector:CPSelectorFromString(ivar.name)];
+            var value = [self performSelector:CPSelectorFromString(ivar.name)];
+            if (value != null)
+            {
+                json[attr] = value;
+            }
     }];
     json['type'] = [[self class] underscoreName];
     return json;
