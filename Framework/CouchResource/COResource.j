@@ -177,9 +177,8 @@ var defaultIdentifierKey = @"_id",
                             {
                                 [self setValue:value forKey:attributeName];
                             } else {
-                                //console.log(attribute);
                                 var dictionary = [CPDictionary dictionaryWithJSObject:value recursively:YES];
-                                [self setValue:objectContainer forKey:attributeName];
+                                [self setValue:value forKey:attributeName];
                             }
                         }
                         break;
@@ -554,8 +553,10 @@ var defaultIdentifierKey = @"_id",
     self = [super init];
     if (self)
     {
-        //[self setType:[[self class] underscoreName]];
-        var selector = [CPString stringWithFormat:@"set%@:", [[self nameIdentifierString] capitalizedString]],
+        var selector = [CPString stringWithFormat:@"set%@%@:",
+                [[[self nameIdentifierString] substringToIndex:1] capitalizedString],
+                [[self nameIdentifierString] substringFromIndex:1]
+            ],
             newName  = [CPString stringWithFormat:@"new %@", [[self class] underscoreName]];
         [self performSelector:CPSelectorFromString(selector) withObject:newName];
 
