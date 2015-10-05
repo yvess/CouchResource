@@ -15,7 +15,6 @@
     CPObject              modelClass @accessors();
     CPMutableArray        items @accessors();
     TNGrowlCenter         growlCenter @accessors();
-    /*CPMutableDictionary   clientsLookup;*/
 }
 
 - (id)initWithCibName:(CPString) aCibNameOrNil
