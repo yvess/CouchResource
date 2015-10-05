@@ -56,7 +56,7 @@
     var item = [self lastSelectedObject];
     if (![item coId])
     {
-        [item setCoId:[[item class] couchId:item]];
+        [item setCoId:[[item class] couchId]];
     }
     var wasSuccessfull = [item save];
     if ([self growlCenter])

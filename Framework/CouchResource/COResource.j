@@ -40,14 +40,10 @@ var defaultIdentifierKey = @"_id",
 }
 
 // you must override this method to generate a couchdbID
-/*+ (id)couchId:(id)aItem
-{
-    return [aItem myProperty];
-}*/
-+ (id)couchId:(id)aItem
++ (id)couchId
 {
     var cType = [[self class] underscoreName];
-    return [CPString stringWithFormat:@"%@-%@", cType, [[aItem nameIdentifier] underscoreString]];
+    return [CPString stringWithFormat:@"%@-%@", cType, [[self nameIdentifierString] underscoreString]];
 }
 
 + (CPString)nextUUID
@@ -438,7 +434,7 @@ var defaultIdentifierKey = @"_id",
         var path             = [[self class] resourcePath] + "/" + identifier,
             notificationName = [self className] + "ResourceWillUpdate";
     } else {
-        [self setCoId:[[self class] couchId:self]];
+        [self setCoId:[[self class] couchId]];
         //[self setType:[[self class] underscoreName]];
         delete attributes._rev; // remove _rev from JSON, couchdb doesn't accept "_rev":null
         var path             = [[self class] resourcePath],
@@ -463,7 +459,7 @@ var defaultIdentifierKey = @"_id",
 
     if (!attributes._rev)
     {
-        [self setIdentifier:[[self class] couchId:self]];
+        [self setIdentifier:[[self class] couchId]];
     }
 
     [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
