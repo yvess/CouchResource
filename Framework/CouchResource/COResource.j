@@ -81,7 +81,7 @@ var defaultIdentifierKey = @"_id",
             attr = [attrString underscoreString];
         }
         var value = [self performSelector:CPSelectorFromString(ivar.name)];
-        if (value != null)
+        if (value != null && value != "" && value != [])
         {
             json[attr] = value;
         }
