@@ -116,6 +116,32 @@ var defaultIdentifierKey = @"_id",
     return aLabel;
 }
 
+
+- (id)valueForObject:(id)value withName:(CPString)attributeName
+{
+    if ([value className] == @"_CPJavaScriptArray")
+    {
+        var valueArray = [[CPArray alloc] initWithArray:value],
+            label = [self transformLabel:attributeName],
+            objectContainer = [[COItemsParent alloc] initWithLabel:label],
+            objectArray = [objectContainer items];
+        [valueArray enumerateObjectsUsingBlock:function(item) {
+            var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]],
+                subObjectClass = CPClassFromString(subObjectClassName);
+            if ([subObjectClass className] == null)
+            {
+                [objectArray addObject:item];
+            } else {
+                [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
+            }
+        }];
+        return objectContainer;
+        //[self setValue:objectContainer forKey:attributeName];
+    } else {
+        //console.log([value className]);
+    }
+}
+
 - (void)setAttributes:(JSObject)attributes
 {
     for (var attribute in attributes)
@@ -150,25 +176,10 @@ var defaultIdentifierKey = @"_id",
                         break;
                     case "object":
                         try {
-                            if ([value className] == @"_CPJavaScriptArray")
+                            var objectValue = [self valueForObject:value withName:attributeName];
+                            if (objectValue)
                             {
-                                var valueArray = [[CPArray alloc] initWithArray:value],
-                                    label = [self transformLabel:attributeName],
-                                    objectContainer = [[COItemsParent alloc] initWithLabel:label],
-                                    objectArray = [objectContainer items];
-                                [valueArray enumerateObjectsUsingBlock:function(item) {
-                                    var subObjectClassName = [CPString stringWithFormat:@"%@%@", [self className], [attributeName capitalizedString]],
-                                        subObjectClass = CPClassFromString(subObjectClassName);
-                                    if ([subObjectClass className] == null)
-                                    {
-                                        [objectArray addObject:item];
-                                    } else {
-                                        [objectArray addObject:[[subObjectClass alloc] initWithJSObject:item]];
-                                    }
-                                }];
-                                [self setValue:objectContainer forKey:attributeName];
-                            } else {
-                                //console.log([value className]);
+                                [self setValue:objectValue forKey:attributeName];
                             }
                         }
                         catch (err)
