@@ -299,7 +299,12 @@ var defaultIdentifierKey = @"_id",
 
 + (CPArray)allWithParams:(JSObject)params
 {
-    var request = [self collectionWillLoad:params],
+    return [self allWithParams:params withPath:nil];
+}
+
++ (CPArray)allWithParams:(JSObject)params withPath:(CPString)aPath
+{
+    var request = [self collectionWillLoad:params withPath:aPath],
         response = [CPURLConnection sendSynchronousRequestCouch:request];
 
     if (response[0] >= 400)
@@ -332,7 +337,7 @@ var defaultIdentifierKey = @"_id",
 
 + (id)findWithParams:(JSObject)params
 {
-    var collection = [self allWithParams:params];
+    var collection = [self allWithParams:params withPath:nil];
 
     if ([collection count] > 0)
     {
@@ -375,13 +380,18 @@ var defaultIdentifierKey = @"_id",
 
 + (CPURLRequest)collectionWillLoad
 {
-    return [self collectionWillLoad:nil];
+    return [self collectionWillLoad:nil withPath:nil];
+}
+
++ (CPURLRequest)collectionWillLoad:(id)params
+{
+    return [self collectionWillLoad:params withPath:nil];
 }
 
 // can handle a JSObject or a CPDictionary
-+ (CPURLRequest)collectionWillLoad:(id)params
++ (CPURLRequest)collectionWillLoad:(id)params withPath:(CPString)aPath
 {
-    var path             = [self resourcePath],
+    var path = aPath != nil ? aPath : [self resourcePath],
         notificationName = [self className] + "CollectionWillLoad";
 
     if (params)
