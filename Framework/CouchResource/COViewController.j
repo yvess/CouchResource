@@ -53,6 +53,7 @@
 
 - (void)saveModel:(id)sender
 {
+    [[[sender window] firstResponder] resignFirstResponder];
     var item = [self lastSelectedObject];
     if (![item coId])
     {
