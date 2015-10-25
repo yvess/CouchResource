@@ -5,8 +5,10 @@
 
 - (void)remove:(id)sender
 {
-    [[CPNotificationCenter defaultCenter] postNotificationName:@"DMRemoveTableRow" object:[self selectedObjects]];
-    [self removeObjects:[[self arrangedObjects] objectsAtIndexes:[self selectionIndexes]]];
+    var objectToRemove = [[self selectedObjects] objectAtIndex:0];
+    [[CPNotificationCenter defaultCenter] postNotificationName:@"DMRemoveTableRow" object:objectToRemove];
+    [self removeObject:objectToRemove];
+    [objectToRemove destroy];
 }
 
 - (void)insert:(id)sender
