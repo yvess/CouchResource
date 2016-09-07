@@ -1,4 +1,3 @@
-@import <AppKit/CPArrayController.j>
 @import <AppKit/CPViewController.j>
 @import <AppKit/CPTableView.j>
 @import <GrowlCappuccino/GrowlCappuccino.j>
