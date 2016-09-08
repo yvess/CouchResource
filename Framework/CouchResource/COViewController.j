@@ -63,7 +63,7 @@
     {
         if (wasSuccessfull)
         {
-            var message = [CPString stringWithFormat:@"doc: %@ \nwas saved", item.coId];
+            var message = [CPString stringWithFormat:@"doc: %@ \nwas saved", [item nameIdentifier]];
             [growlCenter pushNotificationWithTitle:@"saved" message:message];
         } else {
             var message = [CPString stringWithFormat:@"doc: %@ \nerror", item.coId];

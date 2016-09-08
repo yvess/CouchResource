@@ -247,6 +247,18 @@ var defaultIdentifierKey = @"_id",
     }
 }
 
+- (void)addEditor
+{
+    var path = "/add-editor/" + identifier,
+        request = [CPURLRequest requestJSONWithURL:path];
+    [request setHTTPMethod:@"PUT"];
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+    if (response[2])
+    {
+        [self setCoRev:response[2]];
+    }
+}
+
 - (BOOL)save
 {
     var request = [self resourceWillSave];
@@ -265,15 +277,31 @@ var defaultIdentifierKey = @"_id",
     } else {
         [self resourceDidSave:response[1]];
         [self setCoRev:[response[1] objectFromJSON].rev];
+        [self addEditor];
+        return YES;
+    }
+}
 
-        var path = "/add-editor/" + identifier,
-            request = [CPURLRequest requestJSONWithURL:path];
-        [request setHTTPMethod:@"PUT"];
-        var response = [CPURLConnection sendSynchronousRequestCouch:request];
-        if (response[2])
-        {
-            [self setCoRev:response[2]];
-        }
+- (BOOL)destroy
+{
+    self.state = @"delete";
+    var request = [self resourceWillSave];
+
+    if (!request)
+    {
+        return NO;
+    }
+
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+
+    if (response[0] >= 400)
+    {
+        [self resourceDidNotSave:response[1]];
+        return NO;
+    } else {
+        [self resourceDidSave:response[1]];
+        [self setCoRev:[response[1] objectFromJSON].rev];
+        [self addEditor];
         return YES;
     }
 }
@@ -285,26 +313,6 @@ var defaultIdentifierKey = @"_id",
     {
         var newRev = [headers valueForKey:@"X-Couch-Update-NewRev"];
         [self setCoRev:newRev];
-    }
-}
-
-- (BOOL)destroy
-{
-    var request = [self resourceWillDestroy];
-
-    if (!request)
-    {
-        return NO;
-    }
-
-    var response = [CPURLConnection sendSynchronousRequestCouch:request];
-
-    if (response[0] == 200)
-    {
-        [self resourceDidDestroy];
-        return YES;
-    } else {
-        return NO;
     }
 }
 
