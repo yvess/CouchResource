@@ -284,6 +284,31 @@ var defaultIdentifierKey = @"_id",
 
 - (BOOL)destroy
 {
+    return [self performSelector:CPSelectorFromString([self selectorDestroy])];
+}
+
+- (BOOL)destroyResource
+{
+    var request = [self resourceWillDestroy];
+
+    if (!request)
+    {
+        return NO;
+    }
+
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+
+    if (response[0] == 200)
+    {
+        [self resourceDidDestroy];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+- (BOOL)markForDeletion
+{
     self.state = @"delete";
     var request = [self resourceWillSave];
 
@@ -580,6 +605,12 @@ var defaultIdentifierKey = @"_id",
 {
     var notificationName = [self className] + "ResourceDidDestroy";
     [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
+}
+
+// overwrite to change markForDeletion/destroy
+- (CPString)selectorDestroy
+{
+    return @"destroy";
 }
 
 // overwrite this
