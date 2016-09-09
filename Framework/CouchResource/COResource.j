@@ -331,6 +331,29 @@ var defaultIdentifierKey = @"_id",
     }
 }
 
+- (BOOL)markAsDeleted
+{
+    self.state = @"deleted";
+    var request = [self resourceWillSave];
+
+    if (!request)
+    {
+        return NO;
+    }
+
+    var response = [CPURLConnection sendSynchronousRequestCouch:request];
+
+    if (response[0] >= 400)
+    {
+        [self resourceDidNotSave:response[1]];
+        return NO;
+    } else {
+        [self resourceDidSave:response[1]];
+        [self setCoRev:[response[1] objectFromJSON].rev];
+        return YES;
+    }
+}
+
 - (void)connection:(CPURLConnection)connection didReceiveResponse:(CPHTTPURLResponse)response
 {
     var headers = [response allHeaderFields];
