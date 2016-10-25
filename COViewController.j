@@ -1,6 +1,5 @@
 @import <AppKit/CPViewController.j>
 @import <AppKit/CPTableView.j>
-@import <GrowlCappuccino/GrowlCappuccino.j>
 @import "COArrayController.j"
 @import "COCategories.j"
 
@@ -13,18 +12,19 @@
 
     CPObject              modelClass @accessors();
     CPMutableArray        items @accessors();
-    TNGrowlCenter         growlCenter @accessors();
 }
 
 - (id)initWithCibName:(CPString) aCibNameOrNil
       bundle: (CPBundle) aCibBundleOrNil
       modelClass: (CPObject) aModelClass
+      growlCenter: (TNGrowlCenter) aGrowlCenter
 {
     self = [super initWithCibName:aCibNameOrNil bundle:aCibBundleOrNil];
     if (self)
     {
         modelClass = aModelClass;
         items = [modelClass all];
+        self.growlCenter = aGrowlCenter;
     }
     return self;
 }
@@ -59,22 +59,17 @@
         [item setCoId:[[item class] couchId]];
     }
     var wasSuccessfull = [item save];
-    if ([self growlCenter])
+    if (self.growlCenter)
     {
         if (wasSuccessfull)
         {
             var message = [CPString stringWithFormat:@"doc: %@ \nwas saved", [item nameIdentifier]];
-            [growlCenter pushNotificationWithTitle:@"saved" message:message];
+            [self.growlCenter pushNotificationWithTitle:@"saved" message:message];
         } else {
             var message = [CPString stringWithFormat:@"doc: %@ \nerror", item.coId];
-            [growlCenter pushNotificationWithTitle:@"error" message:message];
+            [self.growlCenter pushNotificationWithTitle:@"error" message:message];
         }
     }
-    /*if (![clientsLookup valueForKey:[client coId]])
-    {
-        //[clientsForProjectsPopUp addItemWithTitle:[client name]];
-        [clientsLookup setObject:client forKey:[client coId]];
-    }*/
 }
 
 - (CPMutableDictionary)createLookup

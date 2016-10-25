@@ -1,21 +1,18 @@
 /*
  * Jakefile
- * test
  *
  */
 
-require('./common.jake');
 
 var ENV = require("system").env,
     FILE = require("file"),
-	OS = require("os"),
-	JAKE = require("jake"),
+    OS = require("os"),
+    JAKE = require("jake"),
     task = JAKE.task,
     CLEAN = require("jake/clean").CLEAN,
     FileList = JAKE.FileList,
-    stream = require("narwhal/term").stream,
     framework = require("cappuccino/jake").framework,
-    configuration = ENV["CONFIG"] || ENV["CONFIGURATION"] || ENV["c"] || "Release";
+    configuration = ENV["CONFIGURATION"] || "Release";
 
 framework ("CouchResource", function(task)
 {
@@ -23,12 +20,11 @@ framework ("CouchResource", function(task)
     task.setBuildPath(FILE.join("Build", configuration));
 
     task.setProductName("CouchResource");
-    task.setIdentifier("org.sant0sk1.CouchResource");
     task.setVersion("1.0");
-    task.setAuthor("Jerod Santo");
-    task.setEmail("nospam @nospam@ jerodsanto.net");
+    task.setEmail("y@yas.ch");
     task.setSummary("CouchResource");
-    task.setSources(new FileList("Framework/CouchResource/*.j"));
+    task.setSources(new FileList("*.j", "CouchResource/*.j"));
+    task.setResources(new FileList("Resources/*"));
     task.setInfoPlistPath("Info.plist");
 
     if (configuration === "Debug")
@@ -41,23 +37,15 @@ task("build", ["CouchResource"]);
 
 task("debug", function()
 {
-    ENV["CONFIG"] = "Debug"
+    ENV["CONFIGURATION"] = "Debug"
     JAKE.subjake(["."], "build", ENV);
 });
 
 task("release", function()
 {
-    ENV["CONFIG"] = "Release"
+    ENV["CONFIGURATION"] = "Release"
     JAKE.subjake(["."], "build", ENV);
 });
 
-task ("test", function()
-{
-    var tests = new FileList('Tests/*Test.j');
-    var cmd = ["ojtest"].concat(tests.items());
-    var cmdString = cmd.map(OS.enquote).join(" ");
-
-    var code = OS.system(cmdString);
-    if (code !== 0)
-        OS.exit(code);
-});
+task ("default", ["release"]);
+task ("all", ["release", "debug"]);
