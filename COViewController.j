@@ -3,6 +3,7 @@
 @import "COArrayController.j"
 @import "COCategories.j"
 
+var COGrowlCenter = nil;
 
 @implementation COViewController : CPViewController
 {
@@ -24,7 +25,9 @@
     {
         modelClass = aModelClass;
         items = [modelClass all];
-        self.growlCenter = aGrowlCenter;
+    }
+    if (!COGrowlCenter) {
+        COGrowlCenter = aGrowlCenter;
     }
     return self;
 }
@@ -59,15 +62,15 @@
         [item setCoId:[[item class] couchId]];
     }
     var wasSuccessfull = [item save];
-    if (self.growlCenter)
+    if (COGrowlCenter)
     {
         if (wasSuccessfull)
         {
             var message = [CPString stringWithFormat:@"doc: %@ \nwas saved", [item nameIdentifier]];
-            [self.growlCenter pushNotificationWithTitle:@"saved" message:message];
+            [COGrowlCenter pushNotificationWithTitle:@"saved" message:message];
         } else {
             var message = [CPString stringWithFormat:@"doc: %@ \nerror", item.coId];
-            [self.growlCenter pushNotificationWithTitle:@"error" message:message];
+            [COGrowlCenter pushNotificationWithTitle:@"error" message:message];
         }
     }
 }
