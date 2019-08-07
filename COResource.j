@@ -633,7 +633,7 @@ var defaultIdentifierKey = @"_id",
 // overwrite to change markForDeletion/destroy
 - (CPString)selectorDestroy
 {
-    return @"destroy";
+    return @"destroyResource";
 }
 
 // overwrite this
