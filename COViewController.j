@@ -15,6 +15,17 @@ var COGrowlCenter = nil;
     CPMutableArray        items @accessors();
 }
 
++ (id)couchId
+{
+    var cType = [[self class] underscoreName];
+    return [CPString stringWithFormat:@"%@-%@", cType, [self nextUUID]];
+}
+
++ (CPArray)allItemsFor:(CPObject) aModelClass
+{
+    return [aModelClass all];
+}
+
 - (id)initWithCibName:(CPString) aCibNameOrNil
       bundle: (CPBundle) aCibBundleOrNil
       modelClass: (CPObject) aModelClass
@@ -24,7 +35,7 @@ var COGrowlCenter = nil;
     if (self)
     {
         modelClass = aModelClass;
-        items = [modelClass all];
+        items = [[self class] allItemsFor:modelClass]
     }
     if (!COGrowlCenter) {
         COGrowlCenter = aGrowlCenter;
