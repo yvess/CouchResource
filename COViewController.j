@@ -64,6 +64,10 @@ var COGrowlCenter = nil;
     return [arrayController selectionIndex];
 }
 
+- (CPString)saveMessage:(id)item {
+    return [CPString stringWithFormat:@"doc: %@ \nwas saved", [item nameIdentifier]];
+}
+
 - (void)saveModel:(id)sender
 {
     [[[sender window] firstResponder] resignFirstResponder];
@@ -77,8 +81,7 @@ var COGrowlCenter = nil;
     {
         if (wasSuccessfull)
         {
-            var message = [CPString stringWithFormat:@"doc: %@ \nwas saved", [item nameIdentifier]];
-            [COGrowlCenter pushNotificationWithTitle:@"saved" message:message];
+            [COGrowlCenter pushNotificationWithTitle:@"saved" message:[self saveMessage:item]];
         } else {
             var message = [CPString stringWithFormat:@"doc: %@ \nerror", item.coId];
             [COGrowlCenter pushNotificationWithTitle:@"error" message:message];
