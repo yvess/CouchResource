@@ -249,7 +249,7 @@ var defaultIdentifierKey = @"_id",
 
 - (void)addEditor
 {
-    var path = "/add-editor/" + identifier,
+    var path = "/api/add-editor/" + identifier,
         request = [CPURLRequest requestJSONWithURL:path];
     [request setHTTPMethod:@"PUT"];
     var response = [CPURLConnection sendSynchronousRequestCouch:request];
